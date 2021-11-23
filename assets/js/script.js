@@ -50,15 +50,13 @@ $(".list-group").on("click", "p", function () {
   textInput.trigger("focus");
 });
 
-// value of task was changed
+// editable field was un-focused
 $(".list-group").on("blur", "textarea", function () {
-  // get the textarea's current value/text
-  var text = $(this).val().trim();
+  // get current value of textarea
+  var text = $(this).val();
 
-  // get the parent ul's id attribute
+  // get status type and position in the list
   var status = $(this).closest(".list-group").attr("id").replace("list-", "");
-
-  // get the task's position in the list of other li elements
   var index = $(this).closest(".list-group-item").index();
 
   // update task in array and re-save to localstorage
@@ -68,7 +66,7 @@ $(".list-group").on("blur", "textarea", function () {
   // recreate p element
   var taskP = $("<p>").addClass("m-1").text(text);
 
-  // replace textarea with p element
+  // replace textarea with new content
   $(this).replaceWith(taskP);
 });
 
