@@ -11,6 +11,9 @@ var createTask = function (taskText, taskDate, taskList) {
   // append span and p element to parent li
   taskLi.append(taskSpan, taskP);
 
+  // check due date
+  auditTask(taskLi);
+
   // append to ul list on the page
   $("#list-" + taskList).append(taskLi);
 };
@@ -42,7 +45,7 @@ var saveTasks = function () {
   localStorage.setItem("tasks", JSON.stringify(tasks));
 };
 
-// task was clicked
+// jQuery task was clicked
 $(".list-group").on("click", "p", function () {
   var text = $(this).text().trim();
   var textInput = $("<textarea>").addClass("form-control").val(text);
@@ -50,7 +53,7 @@ $(".list-group").on("click", "p", function () {
   textInput.trigger("focus");
 });
 
-// editable field was un-focused
+// jQuery blur textarea field
 $(".list-group").on("blur", "textarea", function () {
   // get current value of textarea
   var text = $(this).val();
@@ -70,7 +73,7 @@ $(".list-group").on("blur", "textarea", function () {
   $(this).replaceWith(taskP);
 });
 
-// due date was clicked
+// jQuery due date was clicked
 $(".list-group").on("click", "span", function () {
   // get date current value/text
   var date = $(this).text().trim();
@@ -84,12 +87,21 @@ $(".list-group").on("click", "span", function () {
   // swap out elements
   $(this).replaceWith(dateInput);
 
+  // enable jquery ui datepicker
+  dateInput.datepicker({
+    minDate: 1,
+    onClose: function () {
+      // when calendar is closed, force a "change" event on the 'dateInput'
+      $(this).trigger("change");
+    },
+  });
+
   // automatically focus on new element
   dateInput.trigger("focus");
 });
 
-// value of due date was changed
-$(".list-group").on("blur", "input[type='text']", function () {
+// jQuery blur due date field
+$(".list-group").on("change", "input[type='text']", function () {
   // get current task
   var date = $(this).val().trim();
 
@@ -110,9 +122,12 @@ $(".list-group").on("blur", "input[type='text']", function () {
 
   // replace input with span element
   $(this).replaceWith(taskSpan);
+
+  // pass task's <li> element into auditTask() to check new due date
+  auditTask($(taskSpan).closest(".list-group-item"));
 });
 
-// jQuery draggable feature
+// jQuery UI sortable feature
 $(".card .list-group").sortable({
   connectWith: $(".card .list-group"),
   scroll: false,
@@ -155,7 +170,7 @@ $(".card .list-group").sortable({
   },
 });
 
-// jQuery droppable feature
+// jQuery UI droppable feature
 $("#trash").droppable({
   accept: ".card .list-group-item",
   tolerance: "touch",
@@ -170,6 +185,32 @@ $("#trash").droppable({
     console.log("out");
   },
 });
+
+// jQuery UI datepicker
+$("#modalDueDate").datepicker({
+  minDate: 1,
+});
+
+// moment.js tasks due date audit
+var auditTask = function (taskEl) {
+  // get date from task element
+  var date = $(taskEl).find("span").text().trim();
+  // ensure it worked
+  console.log(date);
+
+  // convert to moment object at 5:00pm
+  var time = moment(date, "L").set("hour", 17);
+
+  // remove any old classes from element
+  $(taskEl).removeClass("list-group-item-warning list-group-item-danger");
+
+  // apply new class if task is near/over due date
+  if (moment().isAfter(time)) {
+    $(taskEl).addClass("list-group-item-danger");
+  } else if (Math.abs(moment().diff(time, "days")) <= 2) {
+    $(taskEl).addClass("list-group-item-warning");
+  }
+};
 
 // modal was triggered
 $("#task-form-modal").on("show.bs.modal", function () {
