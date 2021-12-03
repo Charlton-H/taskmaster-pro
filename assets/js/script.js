@@ -19,7 +19,7 @@ var createTask = function (taskText, taskDate, taskList) {
 };
 
 var loadTasks = function () {
-  tasks = JSON.parse(localStorage.getItem("tasks"));
+  tasks = JSON.parse(localStorage.getItem("tasks-pro"));
 
   // if nothing in localStorage, create a new object to track all task status arrays
   if (!tasks) {
@@ -42,7 +42,7 @@ var loadTasks = function () {
 };
 
 var saveTasks = function () {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
+  localStorage.setItem("tasks-pro", JSON.stringify(tasks));
 };
 
 // jQuery task was clicked
@@ -267,7 +267,7 @@ $("#remove-tasks").on("click", function () {
 loadTasks();
 
 setInterval(function () {
-  $(".card .list-group-item").each(function (index, el) {
-    auditTask(el);
+  $(".card .list-group-item").each(function () {
+    auditTask($(this));
   });
 }, 1000 * 60 * 30);
